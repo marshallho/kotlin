@@ -25,6 +25,8 @@ import org.jetbrains.kotlin.ir.expressions.*
 import org.jetbrains.kotlin.ir.expressions.impl.IrDelegatingConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrInstanceInitializerCallImpl
+import org.jetbrains.kotlin.ir.overrides.DefaultFakeOverrideBuilder
+import org.jetbrains.kotlin.ir.overrides.IrOverridingUtil
 import org.jetbrains.kotlin.ir.symbols.IrSimpleFunctionSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.symbols.impl.IrSimpleFunctionSymbolImpl
@@ -435,63 +437,10 @@ val IrFunction.allParameters: List<IrValueParameter>
         explicitParameters
     }
 
-fun IrClass.addFakeOverridesViaIncorrectHeuristic(implementedMembers: List<IrSimpleFunction> = emptyList()) {
-    fun IrDeclaration.toList() = when (this) {
-        is IrSimpleFunction -> listOf(this)
-        is IrProperty -> listOfNotNull(getter, setter)
-        else -> emptyList()
-    }
-
-    val overriddenFunctions = (declarations + implementedMembers)
-        .flatMap { it.toList() }
-        .flatMap { it.overriddenSymbols.map { it.owner } }
-        .toSet()
-
-    val unoverriddenSuperFunctions = superTypes
-        .map { it.getClass()!! }
-        .flatMap { irClass ->
-            irClass.declarations
-                .flatMap { it.toList() }
-                .filter { it !in overriddenFunctions }
-                .filter { it.visibility != Visibilities.PRIVATE }
-        }
-        .toMutableSet()
-
-    // TODO: A dirty hack.
-    val groupedUnoverriddenSuperFunctions = unoverriddenSuperFunctions.groupBy { it.name.asString() + it.allParameters.size }
-
-    fun createFakeOverride(overriddenFunctions: List<IrSimpleFunction>) =
-        overriddenFunctions.first().let { irFunction ->
-            irFunction.factory.buildFun {
-                origin = IrDeclarationOrigin.FAKE_OVERRIDE
-                name = irFunction.name
-                visibility = Visibilities.PUBLIC
-                modality = irFunction.modality
-                returnType = irFunction.returnType
-                isInline = irFunction.isInline
-                isExternal = irFunction.isExternal
-                isTailrec = irFunction.isTailrec
-                isSuspend = irFunction.isSuspend
-                isOperator = irFunction.isOperator
-                isInfix = irFunction.isInfix
-                isExpect = irFunction.isExpect
-                isFakeOverride = true
-            }.apply {
-                parent = this@addFakeOverridesViaIncorrectHeuristic
-                overriddenSymbols = overriddenFunctions.map { it.symbol }
-                copyParameterDeclarationsFrom(irFunction)
-                copyAttributes(irFunction)
-            }
-        }
-
-    val fakeOverriddenFunctions = groupedUnoverriddenSuperFunctions
-        .asSequence()
-        .associate { it.value.first() to createFakeOverride(it.value) }
-        .toMutableMap()
-
-    for (fo in fakeOverriddenFunctions.values) {
-        addChild(fo)
-    }
+fun IrClass.addFakeOverrides(irBuiltIns: IrBuiltIns, implementedMembers: List<IrOverridableMember> = emptyList()) {
+    val fakeOverrides = IrOverridingUtil(irBuiltIns, DefaultFakeOverrideBuilder())
+        .buildFakeOverridesForClassUsingOverriddenSymbols(this, implementedMembers)
+    fakeOverrides.forEach { addChild(it) }
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
