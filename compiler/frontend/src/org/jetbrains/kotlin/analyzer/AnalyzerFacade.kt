@@ -130,22 +130,22 @@ class LazyModuleDependencies<M : ModuleInfo>(
     private val resolverForProject: AbstractResolverForProject<M>
 ) : ModuleDependencies {
     private val dependencies = storageManager.createLazyValue {
+        val moduleDescriptors = mutableSetOf<ModuleDescriptorImpl>()
+        firstDependency?.let {
+            moduleDescriptors.add(resolverForProject.descriptorForModule(it))
+        }
         val moduleDescriptor = resolverForProject.descriptorForModule(module)
-        sequence {
-            if (firstDependency != null) {
-                yield(resolverForProject.descriptorForModule(firstDependency))
-            }
-            if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
-                yield(moduleDescriptor.builtIns.builtInsModule)
-            }
-            for (dependency in module.dependencies()) {
-                @Suppress("UNCHECKED_CAST")
-                yield(resolverForProject.descriptorForModule(dependency as M))
-            }
-            if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.LAST) {
-                yield(moduleDescriptor.builtIns.builtInsModule)
-            }
-        }.toList()
+        if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
+            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
+        }
+        for (dependency in module.dependencies()) {
+            @Suppress("UNCHECKED_CAST")
+            moduleDescriptors.add(resolverForProject.descriptorForModule(dependency as M))
+        }
+        if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.LAST) {
+            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
+        }
+        moduleDescriptors.toList()
     }
 
     override val allDependencies: List<ModuleDescriptorImpl> get() = dependencies()
