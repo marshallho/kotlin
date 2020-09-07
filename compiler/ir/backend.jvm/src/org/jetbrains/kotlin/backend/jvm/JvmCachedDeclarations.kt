@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.backend.jvm.codegen.MethodSignatureMapper
 import org.jetbrains.kotlin.backend.jvm.codegen.isJvmInterface
 import org.jetbrains.kotlin.backend.jvm.ir.copyCorrespondingPropertyFrom
 import org.jetbrains.kotlin.backend.jvm.ir.replaceThisByStaticReference
-import org.jetbrains.kotlin.builtins.CompanionObjectMapping.isMappedIntrinsicCompanionObject
+import org.jetbrains.kotlin.builtins.CompanionObjectMapping.isMappedIntrinsicCompanionObjectClassId
 import org.jetbrains.kotlin.config.LanguageFeature
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.descriptors.Modality
@@ -62,7 +62,7 @@ class JvmCachedDeclarations(
     fun getFieldForObjectInstance(singleton: IrClass): IrField =
         singletonFieldDeclarations.getOrPut(singleton) {
             val originalVisibility = singleton.visibility
-            val isNotMappedCompanion = singleton.isCompanion && !isMappedIntrinsicCompanionObject(singleton.descriptor)
+            val isNotMappedCompanion = singleton.isCompanion && !singleton.isMappedIntrinsicCompanionObject()
             val useProperVisibilityForCompanion =
                 languageVersionSettings.supportsFeature(LanguageFeature.ProperVisibilityForCompanionObjectInstanceField)
                         && singleton.isCompanion
@@ -83,6 +83,9 @@ class JvmCachedDeclarations(
                 parent = if (isNotMappedCompanion) singleton.parent else singleton
             }
         }
+
+    private fun IrClass.isMappedIntrinsicCompanionObject() =
+        isCompanion && classId?.let { isMappedIntrinsicCompanionObjectClassId(it) } == true
 
     fun getPrivateFieldForObjectInstance(singleton: IrClass): IrField =
         if (singleton.isCompanion && singleton.parentAsClass.isJvmInterface)
