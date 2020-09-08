@@ -138,9 +138,7 @@ class LazyModuleDependencies<M : ModuleInfo>(
             }
             val moduleDescriptor = resolverForProject.descriptorForModule(module)
             val dependencyOnBuiltIns = module.dependencyOnBuiltIns()
-            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK ||
-                dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.LAST
-            ) {
+            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
                 add(moduleDescriptor.builtIns.builtInsModule)
             }
             for (dependency in module.dependencies()) {
@@ -149,6 +147,9 @@ class LazyModuleDependencies<M : ModuleInfo>(
                 val element = resolverForProject.descriptorForModule(dependency as M)
                 @Suppress("UNCHECKED_CAST")
                 add(element)
+            }
+            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.LAST) {
+                add(moduleDescriptor.builtIns.builtInsModule)
             }
         }
     }
