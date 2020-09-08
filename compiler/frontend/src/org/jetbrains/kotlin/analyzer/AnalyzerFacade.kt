@@ -130,28 +130,27 @@ class LazyModuleDependencies<M : ModuleInfo>(
     private val resolverForProject: AbstractResolverForProject<M>
 ) : ModuleDependencies {
 
-    @OptIn(ExperimentalStdlibApi::class)
     private val dependencies = storageManager.createLazyValue {
-        buildList {
-            firstDependency?.let {
-                add(resolverForProject.descriptorForModule(it))
-            }
-            val moduleDescriptor = resolverForProject.descriptorForModule(module)
-            val dependencyOnBuiltIns = module.dependencyOnBuiltIns()
-            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
-                add(moduleDescriptor.builtIns.builtInsModule)
-            }
-            for (dependency in module.dependencies()) {
-                if (dependency == firstDependency) continue
 
-                val element = resolverForProject.descriptorForModule(dependency as M)
-                @Suppress("UNCHECKED_CAST")
-                add(element)
-            }
-            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.LAST) {
-                add(moduleDescriptor.builtIns.builtInsModule)
-            }
+        val moduleDescriptors = mutableSetOf<ModuleDescriptorImpl>()
+        firstDependency?.let {
+            moduleDescriptors.add(resolverForProject.descriptorForModule(it))
         }
+        val moduleDescriptor = resolverForProject.descriptorForModule(module)
+        val dependencyOnBuiltIns = module.dependencyOnBuiltIns()
+        if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
+            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
+        }
+        for (dependency in module.dependencies()) {
+            if (dependency == firstDependency) continue
+
+            @Suppress("UNCHECKED_CAST")
+            moduleDescriptors.add(resolverForProject.descriptorForModule(dependency as M))
+        }
+        if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.LAST) {
+            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
+        }
+        moduleDescriptors.toList()
     }
 
     override val allDependencies: List<ModuleDescriptorImpl> get() = dependencies()
