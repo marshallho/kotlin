@@ -79,8 +79,9 @@ class OptionalAnnotationPackageFragmentProvider(
         }
     }
 
-    override fun getPackageFragments(fqName: FqName): List<PackageFragmentDescriptor> =
-        packages[fqName]?.let(::listOf).orEmpty()
+    override fun collectPackageFragments(fqName: FqName, packageFragments: MutableCollection<PackageFragmentDescriptor>) {
+        packages[fqName]?.let { packageFragments.add(it) }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): Collection<FqName> =
         emptyList()

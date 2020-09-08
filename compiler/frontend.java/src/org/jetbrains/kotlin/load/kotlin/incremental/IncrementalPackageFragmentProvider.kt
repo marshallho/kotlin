@@ -56,10 +56,9 @@ class IncrementalPackageFragmentProvider(
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): Collection<FqName> = emptySet()
 
-    override fun getPackageFragments(fqName: FqName): List<PackageFragmentDescriptor> {
-        return listOfNotNull(fqNameToPackageFragment[fqName])
+    override fun collectPackageFragments(fqName: FqName, packageFragments: MutableCollection<PackageFragmentDescriptor>) {
+        fqNameToPackageFragment[fqName]?.let { packageFragments.add(it) }
     }
-
 
     inner class IncrementalPackageFragment(fqName: FqName) : PackageFragmentDescriptorImpl(moduleDescriptor, fqName) {
         val target: TargetId

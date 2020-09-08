@@ -132,7 +132,9 @@ abstract class AndroidPackageFragmentProviderExtension : PackageFragmentProvider
 class AndroidSyntheticPackageFragmentProvider(
     val packages: Map<FqName, () -> PackageFragmentDescriptor>
 ) : PackageFragmentProvider {
-    override fun getPackageFragments(fqName: FqName) = listOfNotNull(packages[fqName]?.invoke())
+    override fun collectPackageFragments(fqName: FqName, packageFragments: MutableCollection<PackageFragmentDescriptor>) {
+        packages[fqName]?.invoke()?.let { packageFragments.add(it) }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): List<FqName> {
         return packages.asSequence()

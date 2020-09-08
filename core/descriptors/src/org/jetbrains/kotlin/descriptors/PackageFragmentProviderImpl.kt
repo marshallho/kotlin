@@ -20,14 +20,19 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PackageFragmentProviderImpl(
-        private val packageFragments: Collection<PackageFragmentDescriptor>
+    private val packageFragments: Collection<PackageFragmentDescriptor>
 ) : PackageFragmentProvider {
-    override fun getPackageFragments(fqName: FqName): List<PackageFragmentDescriptor> =
-            packageFragments.filter { it.fqName == fqName }
+    override fun collectPackageFragments(fqName: FqName, fragments: MutableCollection<PackageFragmentDescriptor>) {
+        for (packageFragment in packageFragments) {
+            if (packageFragment.fqName == fqName) {
+                fragments.add(packageFragment)
+            }
+        }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): Collection<FqName> =
-            packageFragments.asSequence()
-                    .map { it.fqName }
-                    .filter { !it.isRoot && it.parent() == fqName }
-                    .toList()
+        packageFragments.asSequence()
+            .map { it.fqName }
+            .filter { !it.isRoot && it.parent() == fqName }
+            .toList()
 }

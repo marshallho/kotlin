@@ -16,6 +16,7 @@
 
 package org.jetbrains.kotlin.load.java.lazy
 
+import org.jetbrains.kotlin.descriptors.PackageFragmentDescriptor
 import org.jetbrains.kotlin.descriptors.PackageFragmentProvider
 import org.jetbrains.kotlin.load.java.lazy.descriptors.LazyJavaPackageFragment
 import org.jetbrains.kotlin.name.FqName
@@ -40,6 +41,10 @@ class LazyJavaPackageFragmentProvider(
     }
 
     override fun getPackageFragments(fqName: FqName) = listOfNotNull(getPackageFragment(fqName))
+
+    override fun collectPackageFragments(fqName: FqName, packageFragments: MutableCollection<PackageFragmentDescriptor>) {
+        getPackageFragment(fqName)?.let { packageFragments.add(it) }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean) =
         getPackageFragment(fqName)?.getSubPackageFqNames().orEmpty()

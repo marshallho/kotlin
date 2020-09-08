@@ -17,8 +17,13 @@ internal class CommonizedPackageFragmentProvider : PackageFragmentProvider {
         this.packageFragments += packageFragment
     }
 
-    override fun getPackageFragments(fqName: FqName): List<PackageFragmentDescriptor> =
-        packageFragments.filter { it.fqName == fqName }
+    override fun collectPackageFragments(fqName: FqName, fragments: MutableCollection<PackageFragmentDescriptor>) {
+        for (packageFragment in packageFragments) {
+            if (packageFragment.fqName == fqName) {
+                fragments.add(packageFragment)
+            }
+        }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): Collection<FqName> =
         packageFragments.asSequence()

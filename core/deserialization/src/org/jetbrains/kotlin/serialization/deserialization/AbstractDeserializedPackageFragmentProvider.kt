@@ -38,7 +38,9 @@ abstract class AbstractDeserializedPackageFragmentProvider(
 
     protected abstract fun findPackage(fqName: FqName): DeserializedPackageFragment?
 
-    override fun getPackageFragments(fqName: FqName): List<PackageFragmentDescriptor> = listOfNotNull(fragments(fqName))
+    override fun collectPackageFragments(fqName: FqName, packageFragments: MutableCollection<PackageFragmentDescriptor>) {
+        fragments(fqName)?.let { packageFragments.add(it) }
+    }
 
     override fun getSubPackagesOf(fqName: FqName, nameFilter: (Name) -> Boolean): Collection<FqName> = emptySet()
 }
