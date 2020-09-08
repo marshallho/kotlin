@@ -129,23 +129,28 @@ class LazyModuleDependencies<M : ModuleInfo>(
     firstDependency: M? = null,
     private val resolverForProject: AbstractResolverForProject<M>
 ) : ModuleDependencies {
+
+    @OptIn(ExperimentalStdlibApi::class)
     private val dependencies = storageManager.createLazyValue {
-        val moduleDescriptors = mutableSetOf<ModuleDescriptorImpl>()
-        firstDependency?.let {
-            moduleDescriptors.add(resolverForProject.descriptorForModule(it))
+        buildList {
+            firstDependency?.let {
+                add(resolverForProject.descriptorForModule(it))
+            }
+            val moduleDescriptor = resolverForProject.descriptorForModule(module)
+            val dependencyOnBuiltIns = module.dependencyOnBuiltIns()
+            if (dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK ||
+                dependencyOnBuiltIns == ModuleInfo.DependencyOnBuiltIns.LAST
+            ) {
+                add(moduleDescriptor.builtIns.builtInsModule)
+            }
+            for (dependency in module.dependencies()) {
+                if (dependency == firstDependency) continue
+
+                val element = resolverForProject.descriptorForModule(dependency as M)
+                @Suppress("UNCHECKED_CAST")
+                add(element)
+            }
         }
-        val moduleDescriptor = resolverForProject.descriptorForModule(module)
-        if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.AFTER_SDK) {
-            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
-        }
-        for (dependency in module.dependencies()) {
-            @Suppress("UNCHECKED_CAST")
-            moduleDescriptors.add(resolverForProject.descriptorForModule(dependency as M))
-        }
-        if (module.dependencyOnBuiltIns() == ModuleInfo.DependencyOnBuiltIns.LAST) {
-            moduleDescriptors.add(moduleDescriptor.builtIns.builtInsModule)
-        }
-        moduleDescriptors.toList()
     }
 
     override val allDependencies: List<ModuleDescriptorImpl> get() = dependencies()
