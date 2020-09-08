@@ -37,7 +37,7 @@ internal object MapTypeArguments : ResolutionStage() {
             candidate.typeArgumentMapping = TypeArgumentMapping.Mapped(typeArguments)
         } else {
             candidate.typeArgumentMapping = TypeArgumentMapping.Mapped(emptyList())
-            sink.yieldApplicability(CandidateApplicability.INAPPLICABLE)
+            sink.yieldApplicability(FirCandidateApplicability.INAPPLICABLE)
         }
     }
 }
@@ -45,7 +45,7 @@ internal object MapTypeArguments : ResolutionStage() {
 internal object NoTypeArguments : ResolutionStage() {
     override suspend fun check(candidate: Candidate, sink: CheckerSink, callInfo: CallInfo) {
         if (callInfo.typeArguments.isNotEmpty()) {
-            sink.yieldApplicability(CandidateApplicability.INAPPLICABLE)
+            sink.yieldApplicability(FirCandidateApplicability.INAPPLICABLE)
         }
         candidate.typeArgumentMapping = TypeArgumentMapping.NoExplicitArguments
     }

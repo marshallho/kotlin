@@ -7,7 +7,7 @@ package org.jetbrains.kotlin.fir.resolve.diagnostics
 
 import org.jetbrains.kotlin.fir.diagnostics.ConeDiagnostic
 import org.jetbrains.kotlin.fir.resolve.calls.Candidate
-import org.jetbrains.kotlin.fir.resolve.calls.CandidateApplicability
+import org.jetbrains.kotlin.fir.resolve.calls.FirCandidateApplicability
 import org.jetbrains.kotlin.fir.symbols.AbstractFirBasedSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
@@ -36,11 +36,11 @@ class ConeHiddenCandidateError(
 }
 
 class ConeInapplicableCandidateError(
-    val applicability: CandidateApplicability,
+    val applicability: FirCandidateApplicability,
     val candidateSymbol: AbstractFirBasedSymbol<*>,
     val errors: List<ConstraintSystemError>
 ) : ConeDiagnostic() {
-    constructor(applicability: CandidateApplicability, candidate: Candidate) : this(
+    constructor(applicability: FirCandidateApplicability, candidate: Candidate) : this(
         applicability,
         candidate.symbol,
         candidate.system.errors
@@ -49,7 +49,7 @@ class ConeInapplicableCandidateError(
     override val reason: String get() = "Inapplicable($applicability): ${describeSymbol(candidateSymbol)}"
 }
 
-class ConeAmbiguityError(val name: Name, val applicability: CandidateApplicability, val candidates: Collection<AbstractFirBasedSymbol<*>>) : ConeDiagnostic() {
+class ConeAmbiguityError(val name: Name, val applicability: FirCandidateApplicability, val candidates: Collection<AbstractFirBasedSymbol<*>>) : ConeDiagnostic() {
     override val reason: String get() = "Ambiguity: $name, ${candidates.map { describeSymbol(it) }}"
 }
 

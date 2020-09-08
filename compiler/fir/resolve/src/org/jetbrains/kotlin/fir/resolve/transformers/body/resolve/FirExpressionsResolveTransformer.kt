@@ -923,7 +923,7 @@ open class FirExpressionsResolveTransformer(transformer: FirBodyResolveTransform
                         buildErrorNamedReference {
                             // TODO: add better diagnostic
                             source = augmentedArraySetCall.source
-                            diagnostic = ConeAmbiguityError(operatorName, CandidateApplicability.RESOLVED, emptyList())
+                            diagnostic = ConeAmbiguityError(operatorName, FirCandidateApplicability.RESOLVED, emptyList())
                         }
                     )
                 }

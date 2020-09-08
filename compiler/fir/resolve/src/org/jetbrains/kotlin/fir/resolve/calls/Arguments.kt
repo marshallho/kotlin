@@ -201,7 +201,7 @@ fun Candidate.resolvePlainExpressionArgument(
 private fun Candidate.checkApplicabilityForIntegerOperatorCall(sink: CheckerSink, argument: FirExpression) {
     if (symbol.fir !is FirIntegerOperator) return
     if (argument !is FirConstExpression<*> && argument !is FirIntegerOperatorCall) {
-        sink.reportApplicability(CandidateApplicability.INAPPLICABLE)
+        sink.reportApplicability(FirCandidateApplicability.INAPPLICABLE)
     }
 }
 
@@ -264,7 +264,7 @@ private fun checkApplicabilityForArgumentType(
     if (expectedType == null) return
     if (isReceiver && isDispatch) {
         if (!expectedType.isNullable && argumentType.isMarkedNullable) {
-            sink.reportApplicability(CandidateApplicability.WRONG_RECEIVER)
+            sink.reportApplicability(FirCandidateApplicability.WRONG_RECEIVER)
         }
         return
     }
@@ -277,10 +277,10 @@ private fun checkApplicabilityForArgumentType(
         val nullableExpectedType = expectedType.withNullability(ConeNullability.NULLABLE, sink.components.session.typeContext)
 
         if (csBuilder.addSubtypeConstraintIfCompatible(argumentType, nullableExpectedType, position)) {
-            sink.reportApplicability(CandidateApplicability.WRONG_RECEIVER) // TODO
+            sink.reportApplicability(FirCandidateApplicability.WRONG_RECEIVER) // TODO
         } else {
             csBuilder.addSubtypeConstraint(argumentType, expectedType, position)
-            sink.reportApplicability(CandidateApplicability.WRONG_RECEIVER)
+            sink.reportApplicability(FirCandidateApplicability.WRONG_RECEIVER)
         }
     }
 }

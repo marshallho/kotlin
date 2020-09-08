@@ -153,7 +153,7 @@ class FirSyntheticCallGenerator(
         val callInfo = generateCallInfo(name, argumentList, callKind)
         val candidate = generateCandidate(callInfo, function)
         val applicability = resolutionStageRunner.processCandidate(candidate)
-        if (applicability <= CandidateApplicability.INAPPLICABLE) {
+        if (applicability <= FirCandidateApplicability.INAPPLICABLE) {
             return null
         }
 

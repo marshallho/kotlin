@@ -66,7 +66,7 @@ class SingleCandidateResolver(
         )
 
         val applicability = resolutionStageRunner.processCandidate(candidate, stopOnFirstError = true)
-        if (applicability >= CandidateApplicability.SYNTHETIC_RESOLVED) {
+        if (applicability >= FirCandidateApplicability.SYNTHETIC_RESOLVED) {
             return completeResolvedCandidate(candidate, resolutionParameters)
         }
         return null

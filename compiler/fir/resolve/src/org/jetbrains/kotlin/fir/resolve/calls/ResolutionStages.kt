@@ -45,17 +45,17 @@ internal object CheckExplicitReceiverConsistency : ResolutionStage() {
         when (receiverKind) {
             NO_EXPLICIT_RECEIVER -> {
                 if (explicitReceiver != null && explicitReceiver !is FirResolvedQualifier && !explicitReceiver.isSuperReferenceExpression()) {
-                    return sink.yieldApplicability(CandidateApplicability.WRONG_RECEIVER)
+                    return sink.yieldApplicability(FirCandidateApplicability.WRONG_RECEIVER)
                 }
             }
             EXTENSION_RECEIVER, DISPATCH_RECEIVER -> {
                 if (explicitReceiver == null) {
-                    return sink.yieldApplicability(CandidateApplicability.WRONG_RECEIVER)
+                    return sink.yieldApplicability(FirCandidateApplicability.WRONG_RECEIVER)
                 }
             }
             BOTH_RECEIVERS -> {
                 if (explicitReceiver == null) {
-                    return sink.yieldApplicability(CandidateApplicability.WRONG_RECEIVER)
+                    return sink.yieldApplicability(FirCandidateApplicability.WRONG_RECEIVER)
                 }
                 // Here we should also check additional invoke receiver
             }
@@ -151,18 +151,18 @@ private fun FirExpression.isSuperReferenceExpression(): Boolean {
 
 internal object MapArguments : ResolutionStage() {
     override suspend fun check(candidate: Candidate, sink: CheckerSink, callInfo: CallInfo) {
-        val symbol = candidate.symbol as? FirFunctionSymbol<*> ?: return sink.reportApplicability(CandidateApplicability.HIDDEN)
+        val symbol = candidate.symbol as? FirFunctionSymbol<*> ?: return sink.reportApplicability(FirCandidateApplicability.HIDDEN)
         val function = symbol.fir
 
         val mapping = mapArguments(callInfo.arguments, function)
         candidate.argumentMapping = mapping.toArgumentToParameterMapping()
 
-        var applicability = CandidateApplicability.RESOLVED
+        var applicability = FirCandidateApplicability.RESOLVED
         mapping.diagnostics.forEach {
             candidate.diagnostics += it
             applicability = min(applicability, it.applicability)
         }
-        if (applicability < CandidateApplicability.RESOLVED) {
+        if (applicability < FirCandidateApplicability.RESOLVED) {
             return sink.yieldApplicability(applicability)
         }
     }
@@ -181,7 +181,7 @@ internal object CheckArguments : CheckerStage() {
                 sink = sink
             )
             if (candidate.system.hasContradiction) {
-                sink.yieldApplicability(CandidateApplicability.INAPPLICABLE)
+                sink.yieldApplicability(FirCandidateApplicability.INAPPLICABLE)
             }
             sink.yieldIfNeed()
         }
@@ -194,7 +194,7 @@ internal object EagerResolveOfCallableReferences : CheckerStage() {
         for (atom in candidate.postponedAtoms) {
             if (atom is ResolvedCallableReferenceAtom) {
                 if (!candidate.bodyResolveComponents.callResolver.resolveCallableReference(candidate.csBuilder, atom)) {
-                    sink.yieldApplicability(CandidateApplicability.INAPPLICABLE)
+                    sink.yieldApplicability(FirCandidateApplicability.INAPPLICABLE)
                 }
             }
         }
@@ -263,7 +263,7 @@ internal object CheckCallableReferenceExpectedType : CheckerStage() {
         }
 
         if (!isApplicable) {
-            sink.yieldApplicability(CandidateApplicability.INAPPLICABLE)
+            sink.yieldApplicability(FirCandidateApplicability.INAPPLICABLE)
         }
     }
 }
@@ -365,7 +365,7 @@ private fun FirSession.createAdaptedKFunctionType(
 internal object DiscriminateSynthetics : CheckerStage() {
     override suspend fun check(candidate: Candidate, sink: CheckerSink, callInfo: CallInfo) {
         if (candidate.symbol is SyntheticSymbol) {
-            sink.reportApplicability(CandidateApplicability.SYNTHETIC_RESOLVED)
+            sink.reportApplicability(FirCandidateApplicability.SYNTHETIC_RESOLVED)
         }
     }
 }
@@ -388,7 +388,7 @@ internal object CheckVisibility : CheckerStage() {
 
             if (classSymbol is FirRegularClassSymbol) {
                 if (classSymbol.fir.classKind.isSingleton) {
-                    sink.yieldApplicability(CandidateApplicability.HIDDEN)
+                    sink.yieldApplicability(FirCandidateApplicability.HIDDEN)
                 }
                 checkVisibility(classSymbol.fir, classSymbol, sink, candidate, visibilityChecker)
             }
@@ -403,7 +403,7 @@ internal object CheckVisibility : CheckerStage() {
         visibilityChecker: FirVisibilityChecker
     ): Boolean {
         if (!visibilityChecker.isVisible(declaration, symbol, candidate)) {
-            sink.yieldApplicability(CandidateApplicability.HIDDEN)
+            sink.yieldApplicability(FirCandidateApplicability.HIDDEN)
             return false
         }
         return true
@@ -427,7 +427,7 @@ internal object CheckLowPriorityInOverloadResolution : CheckerStage() {
         }
 
         if (hasLowPriorityAnnotation) {
-            sink.reportApplicability(CandidateApplicability.RESOLVED_LOW_PRIORITY)
+            sink.reportApplicability(FirCandidateApplicability.RESOLVED_LOW_PRIORITY)
         }
     }
 }

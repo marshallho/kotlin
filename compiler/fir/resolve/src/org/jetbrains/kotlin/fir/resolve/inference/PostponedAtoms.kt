@@ -11,7 +11,7 @@ import org.jetbrains.kotlin.fir.expressions.FirCallableReferenceAccess
 import org.jetbrains.kotlin.fir.expressions.FirStatement
 import org.jetbrains.kotlin.fir.resolve.DoubleColonLHS
 import org.jetbrains.kotlin.fir.resolve.calls.Candidate
-import org.jetbrains.kotlin.fir.resolve.calls.CandidateApplicability
+import org.jetbrains.kotlin.fir.resolve.calls.FirCandidateApplicability
 import org.jetbrains.kotlin.fir.symbols.StandardClassIds
 import org.jetbrains.kotlin.fir.symbols.impl.ConeClassLikeLookupTagImpl
 import org.jetbrains.kotlin.fir.types.ConeKotlinType
@@ -81,7 +81,7 @@ class ResolvedCallableReferenceAtom(
 ) : PostponedResolvedAtom() {
     var postponed: Boolean = false
 
-    var resultingCandidate: Pair<Candidate, CandidateApplicability>? = null
+    var resultingCandidate: Pair<Candidate, FirCandidateApplicability>? = null
 
     override val inputTypes: Collection<ConeKotlinType>
         get() {

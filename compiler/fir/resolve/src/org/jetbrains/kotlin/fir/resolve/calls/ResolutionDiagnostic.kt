@@ -9,9 +9,9 @@ import org.jetbrains.kotlin.fir.declarations.FirFunction
 import org.jetbrains.kotlin.fir.declarations.FirValueParameter
 import org.jetbrains.kotlin.fir.expressions.FirExpression
 
-abstract class ResolutionDiagnostic(val applicability: CandidateApplicability)
+abstract class ResolutionDiagnostic(val applicability: FirCandidateApplicability)
 
-abstract class InapplicableArgumentDiagnostic : ResolutionDiagnostic(CandidateApplicability.INAPPLICABLE) {
+abstract class InapplicableArgumentDiagnostic : ResolutionDiagnostic(FirCandidateApplicability.INAPPLICABLE) {
     abstract val argument: FirExpression
 }
 
@@ -20,7 +20,7 @@ class MixingNamedAndPositionArguments(override val argument: FirExpression) : In
 class TooManyArguments(
     val argument: FirExpression,
     val function: FirFunction<*>
-) : ResolutionDiagnostic(CandidateApplicability.PARAMETER_MAPPING_ERROR)
+) : ResolutionDiagnostic(FirCandidateApplicability.PARAMETER_MAPPING_ERROR)
 
 class NamedArgumentNotAllowed(
     override val argument: FirExpression,
@@ -43,7 +43,7 @@ class NonVarargSpread(override val argument: FirExpression) : InapplicableArgume
 class NoValueForParameter(
     val valueParameter: FirValueParameter,
     val function: FirFunction<*>
-) : ResolutionDiagnostic(CandidateApplicability.PARAMETER_MAPPING_ERROR)
+) : ResolutionDiagnostic(FirCandidateApplicability.PARAMETER_MAPPING_ERROR)
 
 class NameNotFound(
     override val argument: FirExpression,

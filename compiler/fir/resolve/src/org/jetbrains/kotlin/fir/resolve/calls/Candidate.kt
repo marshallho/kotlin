@@ -73,7 +73,7 @@ data class CallInfo(
         )
 }
 
-enum class CandidateApplicability {
+enum class FirCandidateApplicability {
     HIDDEN,
     WRONG_RECEIVER,
     PARAMETER_MAPPING_ERROR,

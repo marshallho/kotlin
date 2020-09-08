@@ -10,7 +10,7 @@ import org.jetbrains.kotlin.fir.resolve.inference.InferenceComponents
 import kotlin.coroutines.Continuation
 
 abstract class CheckerSink {
-    abstract fun reportApplicability(new: CandidateApplicability)
+    abstract fun reportApplicability(new: FirCandidateApplicability)
 
     abstract val components: InferenceComponents
 
@@ -27,7 +27,7 @@ suspend inline fun CheckerSink.yieldIfNeed() {
     }
 }
 
-suspend inline fun CheckerSink.yieldApplicability(new: CandidateApplicability) {
+suspend inline fun CheckerSink.yieldApplicability(new: FirCandidateApplicability) {
     reportApplicability(new)
     yieldIfNeed()
 }
@@ -37,10 +37,10 @@ class CheckerSinkImpl(
     var continuation: Continuation<Unit>? = null,
     val stopOnFirstError: Boolean = true
 ) : CheckerSink() {
-    var current = CandidateApplicability.RESOLVED
+    var current = FirCandidateApplicability.RESOLVED
         private set
 
-    override fun reportApplicability(new: CandidateApplicability) {
+    override fun reportApplicability(new: FirCandidateApplicability) {
         if (new < current) current = new
     }
 
@@ -51,6 +51,6 @@ class CheckerSinkImpl(
     }
 
     override val needYielding: Boolean
-        get() = stopOnFirstError && current < CandidateApplicability.SYNTHETIC_RESOLVED
+        get() = stopOnFirstError && current < FirCandidateApplicability.SYNTHETIC_RESOLVED
 
 }

@@ -122,7 +122,7 @@ class FirCallResolver(
     }
 
     private data class ResolutionResult(
-        val info: CallInfo, val applicability: CandidateApplicability, val candidates: Collection<Candidate>,
+        val info: CallInfo, val applicability: FirCandidateApplicability, val candidates: Collection<Candidate>,
     )
 
     private fun <T : FirQualifiedAccess> collectCandidates(qualifiedAccess: T, name: Name): ResolutionResult {
@@ -148,7 +148,7 @@ class FirCallResolver(
             info,
         )
         val bestCandidates = result.bestCandidates()
-        val reducedCandidates = if (result.currentApplicability < CandidateApplicability.SYNTHETIC_RESOLVED) {
+        val reducedCandidates = if (result.currentApplicability < FirCandidateApplicability.SYNTHETIC_RESOLVED) {
             bestCandidates.toSet()
         } else {
             val onSuperReference = (explicitReceiver as? FirQualifiedAccessExpression)?.calleeReference is FirSuperReference
@@ -156,7 +156,7 @@ class FirCallResolver(
                 bestCandidates, discriminateGenerics = true, discriminateAbstracts = onSuperReference
             )
         }
-        if ((reducedCandidates.isEmpty() || result.currentApplicability < CandidateApplicability.SYNTHETIC_RESOLVED) &&
+        if ((reducedCandidates.isEmpty() || result.currentApplicability < FirCandidateApplicability.SYNTHETIC_RESOLVED) &&
             explicitReceiver?.typeRef?.coneTypeSafe<ConeIntegerLiteralType>() != null
         ) {
             val approximatedQualifiedAccess = qualifiedAccess.transformExplicitReceiver(integerLiteralTypeApproximator, null)
@@ -191,7 +191,7 @@ class FirCallResolver(
         )
 
         if (qualifiedAccess.explicitReceiver == null) {
-            if (result.applicability < CandidateApplicability.SYNTHETIC_RESOLVED
+            if (result.applicability < FirCandidateApplicability.SYNTHETIC_RESOLVED
             ) {
                 // We should run QualifierResolver if no successful candidates are available
                 // Otherwise expression (even ambiguous) beat qualifier
@@ -259,7 +259,7 @@ class FirCallResolver(
             manager = TowerResolveManager(localCollector),
         )
         val bestCandidates = result.bestCandidates()
-        val noSuccessfulCandidates = result.currentApplicability < CandidateApplicability.SYNTHETIC_RESOLVED
+        val noSuccessfulCandidates = result.currentApplicability < FirCandidateApplicability.SYNTHETIC_RESOLVED
         val reducedCandidates = if (noSuccessfulCandidates) {
             bestCandidates.toSet()
         } else {
@@ -362,7 +362,7 @@ class FirCallResolver(
         val annotationClassSymbol = annotationCall.getCorrespondingClassSymbolOrNull(session)
         val resolvedReference = if (annotationClassSymbol != null && annotationClassSymbol.fir.classKind == ClassKind.ANNOTATION_CLASS) {
             val resolutionResult = createCandidateForAnnotationCall(annotationClassSymbol, callInfo)
-                ?: ResolutionResult(callInfo, CandidateApplicability.HIDDEN, emptyList())
+                ?: ResolutionResult(callInfo, FirCandidateApplicability.HIDDEN, emptyList())
             createResolvedNamedReference(
                 reference,
                 reference.name,
@@ -418,7 +418,7 @@ class FirCallResolver(
         call: FirDelegatedConstructorCall, name: Name, result: CandidateCollector, callInfo: CallInfo
     ): FirDelegatedConstructorCall {
         val bestCandidates = result.bestCandidates()
-        val reducedCandidates = if (result.currentApplicability < CandidateApplicability.SYNTHETIC_RESOLVED) {
+        val reducedCandidates = if (result.currentApplicability < FirCandidateApplicability.SYNTHETIC_RESOLVED) {
             bestCandidates.toSet()
         } else {
             conflictResolver.chooseMaximallySpecificCandidates(bestCandidates, discriminateGenerics = true)
@@ -478,7 +478,7 @@ class FirCallResolver(
         name: Name,
         callInfo: CallInfo,
         candidates: Collection<Candidate>,
-        applicability: CandidateApplicability,
+        applicability: FirCandidateApplicability,
         explicitReceiver: FirExpression? = null,
     ): FirNamedReference {
         val source = reference.source
@@ -497,10 +497,10 @@ class FirCallResolver(
                 name
             )
 
-            applicability < CandidateApplicability.SYNTHETIC_RESOLVED -> {
+            applicability < FirCandidateApplicability.SYNTHETIC_RESOLVED -> {
                 val candidate = candidates.single()
                 val diagnostic = when (applicability) {
-                    CandidateApplicability.HIDDEN -> ConeHiddenCandidateError(candidate.symbol)
+                    FirCandidateApplicability.HIDDEN -> ConeHiddenCandidateError(candidate.symbol)
                     else -> ConeInapplicableCandidateError(applicability, candidate)
                 }
                 buildErrorReference(source, candidate, diagnostic)

@@ -74,10 +74,10 @@ class PostponedArgumentsAnalyzer(
         val callableReferenceAccess = atom.reference
         atom.analyzed = true
         val (resultingCandidate, applicability) = atom.resultingCandidate
-            ?: Pair(null, CandidateApplicability.INAPPLICABLE)
+            ?: Pair(null, FirCandidateApplicability.INAPPLICABLE)
 
         val namedReference = when {
-            resultingCandidate == null || applicability < CandidateApplicability.SYNTHETIC_RESOLVED ->
+            resultingCandidate == null || applicability < FirCandidateApplicability.SYNTHETIC_RESOLVED ->
                 buildErrorNamedReference {
                     source = callableReferenceAccess.source
                     diagnostic = ConeUnresolvedReferenceError(callableReferenceAccess.calleeReference.name)

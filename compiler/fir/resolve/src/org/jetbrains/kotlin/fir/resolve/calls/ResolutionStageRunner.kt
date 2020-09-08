@@ -13,7 +13,7 @@ import kotlin.coroutines.intrinsics.createCoroutineUnintercepted
 import kotlin.coroutines.resume
 
 class ResolutionStageRunner(val components: InferenceComponents) {
-    fun processCandidate(candidate: Candidate, stopOnFirstError: Boolean = true): CandidateApplicability {
+    fun processCandidate(candidate: Candidate, stopOnFirstError: Boolean = true): FirCandidateApplicability {
         val sink = CheckerSinkImpl(components, stopOnFirstError = stopOnFirstError)
         var finished = false
         sink.continuation = suspend {
@@ -34,7 +34,7 @@ class ResolutionStageRunner(val components: InferenceComponents) {
 
         while (!finished) {
             sink.continuation!!.resume(Unit)
-            if (sink.current < CandidateApplicability.SYNTHETIC_RESOLVED) {
+            if (sink.current < FirCandidateApplicability.SYNTHETIC_RESOLVED) {
                 break
             }
         }
