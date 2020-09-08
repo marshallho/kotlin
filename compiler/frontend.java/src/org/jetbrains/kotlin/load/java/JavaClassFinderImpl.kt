@@ -17,7 +17,6 @@
 package org.jetbrains.kotlin.load.java
 
 import com.intellij.openapi.project.Project
-import com.intellij.psi.search.GlobalSearchScope
 import org.jetbrains.kotlin.load.java.structure.JavaClass
 import org.jetbrains.kotlin.load.java.structure.JavaPackage
 import org.jetbrains.kotlin.load.java.structure.impl.JavaPackageImpl
@@ -36,18 +35,15 @@ class JavaClassFinderImpl : AbstractJavaClassFinder() {
     }
 
     override fun findClass(request: JavaClassFinder.Request): JavaClass? {
-        if (javaSearchScope == GlobalSearchScope.EMPTY_SCOPE) return null
         return javaFacade.findClass(request, javaSearchScope)
     }
 
     override fun findPackage(fqName: FqName): JavaPackage? {
-        if (javaSearchScope == GlobalSearchScope.EMPTY_SCOPE) return null
         return javaFacade.findPackage(fqName.asString(), javaSearchScope)?.let { JavaPackageImpl(it, javaSearchScope) }
     }
 
     override fun knownClassNamesInPackage(packageFqName: FqName): Set<String>? {
-        if (javaSearchScope == GlobalSearchScope.EMPTY_SCOPE) return null
-        return javaFacade.knownClassNamesInPackage(packageFqName)
+        return javaFacade.knownClassNamesInPackage(packageFqName, javaSearchScope)
     }
 
 }

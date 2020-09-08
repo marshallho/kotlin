@@ -145,6 +145,8 @@ public class KotlinJavaPsiFacade {
     }
 
     public JavaClass findClass(@NotNull JavaClassFinder.Request request, @NotNull GlobalSearchScope scope) {
+        if (scope == GlobalSearchScope.EMPTY_SCOPE) return null;
+
         // We hope this method is being called often enough to cancel daemon processes smoothly
         ProgressIndicatorAndCompilationCanceledStatus.checkCanceled();
 
@@ -190,7 +192,9 @@ public class KotlinJavaPsiFacade {
     }
 
     @Nullable
-    public Set<String> knownClassNamesInPackage(@NotNull FqName packageFqName) {
+    public Set<String> knownClassNamesInPackage(@NotNull FqName packageFqName, @NotNull GlobalSearchScope scope) {
+        if (scope == GlobalSearchScope.EMPTY_SCOPE) return null;
+
         KotlinPsiElementFinderWrapper[] finders = finders();
 
         if (finders.length == 1 && finders[0] instanceof CliFinder) {
@@ -272,6 +276,8 @@ public class KotlinJavaPsiFacade {
     }
 
     public PsiPackage findPackage(@NotNull String qualifiedName, GlobalSearchScope searchScope) {
+        if (searchScope == GlobalSearchScope.EMPTY_SCOPE) return null;
+
         ProgressIndicatorAndCompilationCanceledStatus.checkCanceled();
         if (certainlyDoesNotExist(qualifiedName, searchScope)) return null;
 

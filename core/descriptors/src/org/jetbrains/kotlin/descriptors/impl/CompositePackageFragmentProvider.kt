@@ -27,7 +27,7 @@ class CompositePackageFragmentProvider(// can be modified from outside
 ) : PackageFragmentProvider {
 
     init {
-        check(providers.size == providers.toSet().size) {
+        assert(providers.size == providers.toSet().size) {
             "providers.size is ${providers.size} while only ${providers.toSet().size} unique providers"
         }
     }
