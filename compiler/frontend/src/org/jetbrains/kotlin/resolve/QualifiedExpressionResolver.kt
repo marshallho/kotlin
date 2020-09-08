@@ -574,7 +574,7 @@ class QualifiedExpressionResolver(val languageVersionSettings: LanguageVersionSe
         context: ExpressionTypingContext
     ): Qualifier? {
         val name = expression.getReferencedNameAsName()
-        if (!name.isSpecial && name.asString().endsWith(CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED)) {
+        if (!expression.isPhysical && !name.isSpecial && name.asString().endsWith(CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED)) {
             return null
         }
 
